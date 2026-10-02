@@ -1,0 +1,98 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="German Learning">
+<title>German Spaced Practice</title>
+<style>
+:root{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Arial,sans-serif;color:#171717;background:#f4f4f7}
+*{box-sizing:border-box} body{margin:0;min-height:100vh;padding:env(safe-area-inset-top) 18px env(safe-area-inset-bottom);display:flex;justify-content:center}
+main{width:min(100%,560px);padding:20px 0 40px} h1{font-size:28px;margin:10px 0 4px;text-align:center}
+.sub{text-align:center;color:#666;margin:0 0 18px}.mode{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:16px}
+button{touch-action:manipulation;-webkit-tap-highlight-color:transparent;font:inherit;border:0;border-radius:14px;padding:14px 10px;font-weight:650;cursor:pointer}
+.mode button{background:#fff;box-shadow:0 1px 4px #0001}.mode button.active{background:#171717;color:white}
+.card{background:white;border-radius:24px;padding:26px 20px;min-height:315px;box-shadow:0 5px 24px #00000012;display:flex;flex-direction:column;justify-content:center;text-align:center}
+.label{font-size:13px;text-transform:uppercase;letter-spacing:.08em;color:#888;margin-bottom:8px}.prompt.chinese{font-size:58px}.prompt{font-size:44px;font-weight:700;line-height:1.15;overflow-wrap:anywhere}
+.answer .chinese{font-size:34px;font-weight:650}.answer{margin-top:24px;padding-top:20px;border-top:1px solid #eee}.answer .line{font-size:25px;margin:9px 0}.hidden{visibility:hidden}
+.actions{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:14px}.actions .wide{grid-column:1/-1;background:#171717;color:#fff;font-size:18px}
+.good{background:#e8f6eb}.bad{background:#fdeaea}.stats{display:flex;justify-content:space-between;align-items:center;color:#666;font-size:14px;margin:14px 3px 0}
+.small{background:transparent;color:#666;padding:8px}.due{text-align:center;color:#666;font-size:13px;margin-top:8px}
+@media(max-width:390px){.mode button{font-size:13px;padding:12px 5px}.prompt{font-size:38px}}
+</style>
+</head>
+<body><main>
+<h1>German Learning</h1>
+<p class="sub">Spaced practice · 101 entries from your Excel workbook</p>
+<div class="mode">
+<button type="button" id="germanMode">German first</button>
+<button type="button" id="englishMode">English first</button>
+<button type="button" id="pinyinMode">Pinyin first</button>
+<button type="button" id="chineseMode">Chinese first</button>
+</div>
+<section class="card">
+<div class="label" id="promptLabel"></div><div id="prompt" class="prompt"></div>
+<div id="answer" class="answer hidden"><div class="label">Answer</div><div id="answer1" class="line"></div><div id="answer2" class="line"></div><div id="answer3" class="line"></div></div>
+</section>
+<div class="actions">
+<button type="button" id="reveal" class="wide">Show answer</button>
+<button type="button" id="wrong" class="bad">Again</button><button type="button" id="correct" class="good">Correct</button>
+<button type="button" id="next" class="wide">Next practice word</button>
+</div>
+<div class="due" id="dueInfo"></div>
+<div class="stats"><span id="score">Correct 0 · Again 0</span><button type="button" id="reset" class="small">Reset progress</button></div>
+</main>
+<script>
+var words = [{"german": "ich", "english": "I", "pinyin": "wǒ", "chinese": "我"}, {"german": "du", "english": "you", "pinyin": "nǐ", "chinese": "你"}, {"german": "er", "english": "he", "pinyin": "tā", "chinese": "他"}, {"german": "sie", "english": "she", "pinyin": "tā", "chinese": "她"}, {"german": "wir", "english": "we", "pinyin": "wǒmen", "chinese": "我们"}, {"german": "ihr", "english": "you (plural)", "pinyin": "nǐmen", "chinese": "你们"}, {"german": "sie", "english": "they", "pinyin": "tāmen", "chinese": "他们"}, {"german": "sein", "english": "to be", "pinyin": "shì", "chinese": "是"}, {"german": "haben", "english": "to have", "pinyin": "yǒu", "chinese": "有"}, {"german": "werden", "english": "to become", "pinyin": "chéngwéi", "chinese": "成为"}, {"german": "machen", "english": "to do / make", "pinyin": "zuò", "chinese": "做"}, {"german": "gehen", "english": "to go", "pinyin": "qù", "chinese": "去"}, {"german": "kommen", "english": "to come", "pinyin": "lái", "chinese": "来"}, {"german": "sehen", "english": "to see", "pinyin": "kàn / kànjiàn", "chinese": "看 / 看见"}, {"german": "sagen", "english": "to say", "pinyin": "shuō", "chinese": "说"}, {"german": "sprechen", "english": "to speak", "pinyin": "shuōhuà", "chinese": "说话"}, {"german": "wissen", "english": "to know (a fact)", "pinyin": "zhīdào", "chinese": "知道"}, {"german": "kennen", "english": "to know (person/place)", "pinyin": "rènshi", "chinese": "认识"}, {"german": "denken", "english": "to think", "pinyin": "xiǎng / rènwéi", "chinese": "想 / 认为"}, {"german": "wollen", "english": "to want", "pinyin": "xiǎngyào", "chinese": "想要"}, {"german": "können", "english": "can / be able", "pinyin": "néng / huì", "chinese": "能 / 会"}, {"german": "müssen", "english": "must", "pinyin": "bìxū", "chinese": "必须"}, {"german": "geben", "english": "to give", "pinyin": "gěi", "chinese": "给"}, {"german": "nehmen", "english": "to take", "pinyin": "ná", "chinese": "拿"}, {"german": "finden", "english": "to find", "pinyin": "zhǎodào", "chinese": "找到"}, {"german": "bleiben", "english": "to stay", "pinyin": "liúxià", "chinese": "留下"}, {"german": "leben", "english": "to live", "pinyin": "shēnghuó", "chinese": "生活"}, {"german": "arbeiten", "english": "to work", "pinyin": "gōngzuò", "chinese": "工作"}, {"german": "lernen", "english": "to learn", "pinyin": "xuéxí", "chinese": "学习"}, {"german": "essen", "english": "to eat", "pinyin": "chī", "chinese": "吃"}, {"german": "trinken", "english": "to drink", "pinyin": "hē", "chinese": "喝"}, {"german": "schlafen", "english": "to sleep", "pinyin": "shuìjiào", "chinese": "睡觉"}, {"german": "kaufen", "english": "to buy", "pinyin": "mǎi", "chinese": "买"}, {"german": "brauchen", "english": "to need", "pinyin": "xūyào", "chinese": "需要"}, {"german": "helfen", "english": "to help", "pinyin": "bāngzhù", "chinese": "帮助"}, {"german": "fragen", "english": "to ask", "pinyin": "wèn", "chinese": "问"}, {"german": "antworten", "english": "to answer", "pinyin": "huídá", "chinese": "回答"}, {"german": "lieben", "english": "to love", "pinyin": "ài", "chinese": "爱"}, {"german": "mögen", "english": "to like", "pinyin": "xǐhuan", "chinese": "喜欢"}, {"german": "gut", "english": "good", "pinyin": "hǎo", "chinese": "好"}, {"german": "schlecht", "english": "bad", "pinyin": "huài / bù hǎo", "chinese": "坏 / 不好"}, {"german": "groß", "english": "big / tall", "pinyin": "dà / gāo", "chinese": "大 / 高"}, {"german": "klein", "english": "small", "pinyin": "xiǎo", "chinese": "小"}, {"german": "alt", "english": "old", "pinyin": "lǎo / jiù", "chinese": "老 / 旧"}, {"german": "jung", "english": "young", "pinyin": "niánqīng", "chinese": "年轻"}, {"german": "neu", "english": "new", "pinyin": "xīn", "chinese": "新"}, {"german": "schön", "english": "beautiful", "pinyin": "piàoliang / měi", "chinese": "漂亮 / 美"}, {"german": "schnell", "english": "fast", "pinyin": "kuài", "chinese": "快"}, {"german": "langsam", "english": "slow", "pinyin": "màn", "chinese": "慢"}, {"german": "heiß", "english": "hot", "pinyin": "rè", "chinese": "热"}, {"german": "kalt", "english": "cold", "pinyin": "lěng", "chinese": "冷"}, {"german": "viel", "english": "much / a lot", "pinyin": "duō", "chinese": "多"}, {"german": "wenig", "english": "little / few", "pinyin": "shǎo", "chinese": "少"}, {"german": "mehr", "english": "more", "pinyin": "gèng duō", "chinese": "更多"}, {"german": "hier", "english": "here", "pinyin": "zhèlǐ", "chinese": "这里"}, {"german": "dort", "english": "there", "pinyin": "nàlǐ", "chinese": "那里"}, {"german": "heute", "english": "today", "pinyin": "jīntiān", "chinese": "今天"}, {"german": "morgen", "english": "tomorrow", "pinyin": "míngtiān", "chinese": "明天"}, {"german": "gestern", "english": "yesterday", "pinyin": "zuótiān", "chinese": "昨天"}, {"german": "jetzt", "english": "now", "pinyin": "xiànzài", "chinese": "现在"}, {"german": "später", "english": "later", "pinyin": "yǐhòu / shāohòu", "chinese": "以后 / 稍后"}, {"german": "immer", "english": "always", "pinyin": "zǒngshì", "chinese": "总是"}, {"german": "oft", "english": "often", "pinyin": "jīngcháng", "chinese": "经常"}, {"german": "manchmal", "english": "sometimes", "pinyin": "yǒushíhou", "chinese": "有时候"}, {"german": "nie", "english": "never", "pinyin": "cóngbù", "chinese": "从不"}, {"german": "ja", "english": "yes", "pinyin": "shì / duì", "chinese": "是 / 对"}, {"german": "nein", "english": "no", "pinyin": "bù / bú shì", "chinese": "不 / 不是"}, {"german": "nicht", "english": "not", "pinyin": "bù", "chinese": "不"}, {"german": "auch", "english": "also", "pinyin": "yě", "chinese": "也"}, {"german": "sehr", "english": "very", "pinyin": "hěn", "chinese": "很"}, {"german": "vielleicht", "english": "perhaps", "pinyin": "yěxǔ", "chinese": "也许"}, {"german": "warum", "english": "why", "pinyin": "wèishénme", "chinese": "为什么"}, {"german": "was", "english": "what", "pinyin": "shénme", "chinese": "什么"}, {"german": "wer", "english": "who", "pinyin": "shéi", "chinese": "谁"}, {"german": "wo", "english": "where", "pinyin": "nǎlǐ", "chinese": "哪里"}, {"german": "wann", "english": "when", "pinyin": "shénme shíhou", "chinese": "什么时候"}, {"german": "wie", "english": "how", "pinyin": "zěnme", "chinese": "怎么"}, {"german": "welcher", "english": "which", "pinyin": "nǎge", "chinese": "哪个"}, {"german": "Mensch", "english": "person / human", "pinyin": "rén", "chinese": "人"}, {"german": "Mann", "english": "man", "pinyin": "nánrén", "chinese": "男人"}, {"german": "Frau", "english": "woman", "pinyin": "nǚrén", "chinese": "女人"}, {"german": "Kind", "english": "child", "pinyin": "háizi", "chinese": "孩子"}, {"german": "Freund", "english": "friend", "pinyin": "péngyou", "chinese": "朋友"}, {"german": "Familie", "english": "family", "pinyin": "jiātíng", "chinese": "家庭"}, {"german": "Haus", "english": "house", "pinyin": "fángzi", "chinese": "房子"}, {"german": "Stadt", "english": "city", "pinyin": "chéngshì", "chinese": "城市"}, {"german": "Land", "english": "country", "pinyin": "guójiā", "chinese": "国家"}, {"german": "Welt", "english": "world", "pinyin": "shìjiè", "chinese": "世界"}, {"german": "Wasser", "english": "water", "pinyin": "shuǐ", "chinese": "水"}, {"german": "Essen", "english": "food", "pinyin": "shíwù", "chinese": "食物"}, {"german": "Geld", "english": "money", "pinyin": "qián", "chinese": "钱"}, {"german": "Arbeit", "english": "work", "pinyin": "gōngzuò", "chinese": "工作"}, {"german": "Zeit", "english": "time", "pinyin": "shíjiān", "chinese": "时间"}, {"german": "Tag", "english": "day", "pinyin": "tiān", "chinese": "天"}, {"german": "Jahr", "english": "year", "pinyin": "nián", "chinese": "年"}, {"german": "Name", "english": "name", "pinyin": "míngzi", "chinese": "名字"}, {"german": "Frage", "english": "question", "pinyin": "wèntí", "chinese": "问题"}, {"german": "Antwort", "english": "answer", "pinyin": "huídá", "chinese": "回答"}, {"german": "Sprache", "english": "language", "pinyin": "yǔyán", "chinese": "语言"}, {"german": "Wort", "english": "word", "pinyin": "cí", "chinese": "词"}, {"german": "Jahr", "english": "year", "pinyin": "nián", "chinese": "年"}];
+function safeGet(k,f){try{var v=localStorage.getItem(k);return v===null?f:v}catch(e){return f}}
+function safeSet(k,v){try{localStorage.setItem(k,v)}catch(e){}}
+var mode=safeGet("germanQuizMode","german"), current=-1, previous=-1;
+var stats; try{stats=JSON.parse(safeGet("germanQuizStats",'{"correct":0,"wrong":0}'))}catch(e){stats={correct:0,wrong:0}}
+var progress; try{progress=JSON.parse(safeGet("germanSpacedProgress","{}"))}catch(e){progress={}}
+function $(id){return document.getElementById(id)}
+function state(i){if(!progress[i])progress[i]={box:0,due:0};return progress[i]}
+function choose(){
+  var now=Date.now(), due=[], unseen=[];
+  for(var i=0;i<words.length;i++){var s=state(i);if(!s.due)unseen.push(i);else if(s.due<=now)due.push(i)}
+  var pool=due.length?due:(unseen.length?unseen:words.map(function(_,i){return i}));
+  if(pool.length>1){do{current=pool[Math.floor(Math.random()*pool.length)]}while(current===previous)}
+  else current=pool[0];
+  previous=current; render(false);
+}
+function fields(w){
+ if(mode==="german")return["German",w.german,w.english,w.pinyin,w.chinese];
+ if(mode==="english")return["English",w.english,w.german,w.pinyin,w.chinese];
+ if(mode==="pinyin")return["Pinyin",w.pinyin,w.german,w.english,w.chinese];
+ return["Chinese",w.chinese,w.german,w.english,w.pinyin];
+}
+function render(show){
+ var w=words[current],f=fields(w); $("promptLabel").textContent=f[0];$("prompt").textContent=f[1];
+ $("answer1").textContent=f[2];$("answer2").textContent=f[3];$("answer3").textContent=f[4];$("answer3").classList.toggle("chinese",mode!=="chinese");$("prompt").classList.toggle("chinese",mode==="chinese");$("answer").classList.toggle("hidden",!show);
+ $("reveal").textContent=show?"Hide answer":"Show answer";
+ ["germanMode","englishMode","pinyinMode","chineseMode"].forEach(function(x){$(x).classList.remove("active")});
+ $(mode+"Mode").classList.add("active"); updateStats();
+}
+function updateStats(){
+ $("score").textContent="Correct "+stats.correct+" · Again "+stats.wrong;
+ var now=Date.now(),n=0;for(var i=0;i<words.length;i++){var s=state(i);if(!s.due||s.due<=now)n++}
+ $("dueInfo").textContent=n+" words ready for practice";
+}
+function setMode(m){mode=m;safeSet("germanQuizMode",m);choose()}
+function markCorrect(){
+ var s=state(current);s.box=Math.min((s.box||0)+1,5);
+ var mins=[10,60,360,1440,4320,10080][s.box];s.due=Date.now()+mins*60000;
+ stats.correct++;save();choose();
+}
+function markWrong(){
+ var s=state(current);s.box=0;s.due=Date.now()+2*60000;
+ stats.wrong++;save();render(true);
+}
+function save(){safeSet("germanQuizStats",JSON.stringify(stats));safeSet("germanSpacedProgress",JSON.stringify(progress))}
+$("germanMode").onclick=function(){setMode("german")};$("englishMode").onclick=function(){setMode("english")};$("pinyinMode").onclick=function(){setMode("pinyin")};$("chineseMode").onclick=function(){setMode("chinese")};
+$("reveal").onclick=function(){render($("answer").classList.contains("hidden"))};$("next").onclick=choose;
+$("correct").onclick=markCorrect;$("wrong").onclick=markWrong;
+$("reset").onclick=function(){if(confirm("Reset all German practice progress?")){stats={correct:0,wrong:0};progress={};save();choose()}};
+choose();
+</script></body></html>
